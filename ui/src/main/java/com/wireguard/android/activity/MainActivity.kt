@@ -74,11 +74,11 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
 
     private fun handleDeeplinkIntent(intent: Intent) {
         val uri = intent.data ?: return
-        if (uri.scheme != "goravpn" || uri.host != "import") return
+        if (uri.scheme != "wgturn" || uri.host != "import") return
 
         // Два формата deep-link'а:
-        //   goravpn://import?url=<full_url>      — провайдер-агностик (новый формат)
-        //   goravpn://import?token=<short_uuid>  — legacy (key.shadowgate.online)
+        //   wgturn://import?url=<full_url>      — провайдер-агностик (новый формат)
+        //   wgturn://import?token=<short_uuid>  — legacy (key.shadowgate.online)
         val explicitUrl = uri.getQueryParameter("url")?.takeIf { it.isNotBlank() }
         val token = uri.getQueryParameter("token")?.takeIf { it.isNotBlank() }
 
@@ -181,6 +181,6 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
     }
 
     companion object {
-        private const val TUNNEL_NAME = "goravpn"
+        private const val TUNNEL_NAME = "wgturn"
     }
 }
