@@ -115,7 +115,7 @@
                 android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:visibility="gone"
-                android:text="Ключ не найден.\nПолучите его в боте:"
+                android:text="Туннель не настроен.\nПерейди по ссылке от провайдера VPN"
                 android:textSize="15sp"
                 android:lineSpacingMultiplier="1.4"
                 android:textColor="?attr/colorOnSurfaceVariant" />
@@ -127,7 +127,7 @@
                 android:layout_marginTop="6dp"
                 android:gravity="center"
                 android:visibility="gone"
-                android:text="@wg_key_bot"
+                android:text="@vpn_gora_bot"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary"
