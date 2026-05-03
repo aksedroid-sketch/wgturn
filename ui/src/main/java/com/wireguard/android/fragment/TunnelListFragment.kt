@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import androidx.activity.result.contract.ActivityResultContracts
 import com.wireguard.android.backend.GoBackend
 
-private const val TUNNEL_NAME = "wgkeybot"
+private const val TUNNEL_NAME = "wgturn"
 
 class TunnelListFragment : BaseFragment() {
 
@@ -182,7 +182,7 @@ class TunnelListFragment : BaseFragment() {
                 val tunnel = Application.getTunnelManager().getTunnels()
                     .firstOrNull { it.name == TUNNEL_NAME }
                 if (tunnel == null) {
-                    showSnackbar("Конфиг wgkeybot не найден.")
+                    showSnackbar("Конфиг wgturn не найден.")
                     binding?.vpnToggleButton?.isEnabled = true
                     return@launch
                 }
@@ -217,7 +217,7 @@ class TunnelListFragment : BaseFragment() {
                 val tunnel = Application.getTunnelManager().getTunnels()
                     .firstOrNull { it.name == TUNNEL_NAME }
                 if (tunnel == null) {
-                    showSnackbar("Конфиг wgkeybot не найден.")
+                    showSnackbar("Конфиг wgturn не найден.")
                     return@launch
                 }
                 val config = tunnel.getConfigAsync()
@@ -255,7 +255,7 @@ class TunnelListFragment : BaseFragment() {
                 val tunnel = Application.getTunnelManager().getTunnels()
                     .firstOrNull { it.name == TUNNEL_NAME }
                 if (tunnel == null) {
-                    showSnackbar("Конфиг wgkeybot не найден.")
+                    showSnackbar("Конфиг wgturn не найден.")
                     return@launch
                 }
 
@@ -311,7 +311,7 @@ class TunnelListFragment : BaseFragment() {
                 binding.botLinkButton.setOnClickListener {
                     val intent = android.content.Intent(
                         android.content.Intent.ACTION_VIEW,
-                        android.net.Uri.parse("https://t.me/wg_key_bot")
+                        android.net.Uri.parse("https://t.me/vpn_gora_bot")
                     )
                     startActivity(intent)
                 }
