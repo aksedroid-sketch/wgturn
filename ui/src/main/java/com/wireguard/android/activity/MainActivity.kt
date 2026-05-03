@@ -74,22 +74,25 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
 
     private fun handleDeeplinkIntent(intent: Intent) {
         val uri = intent.data ?: return
-        if (uri.scheme != "wgkeybot" || uri.host != "import") return
+        if (uri.scheme != "goravpn" || uri.host != "import") return
 
-        val token = uri.getQueryParameter("token") ?: run {
-            Toast.makeText(this, "Deeplink: отсутствует параметр token", Toast.LENGTH_SHORT).show()
-            return
-        }
+        // Два формата deep-link'а:
+        //   goravpn://import?url=<full_url>      — провайдер-агностик (новый формат)
+        //   goravpn://import?token=<short_uuid>  — legacy (key.shadowgate.online)
+        val explicitUrl = uri.getQueryParameter("url")?.takeIf { it.isNotBlank() }
+        val token = uri.getQueryParameter("token")?.takeIf { it.isNotBlank() }
 
-        if (token.isBlank()) {
-            Toast.makeText(this, "Deeplink: пустой token", Toast.LENGTH_SHORT).show()
-            return
-        }
+        val configUrl = explicitUrl
+            ?: token?.let { "https://key.shadowgate.online/api/config/$it" }
+            ?: run {
+                Toast.makeText(this, "Deeplink: укажите ?url=... или ?token=...", Toast.LENGTH_SHORT).show()
+                return
+            }
 
         lifecycleScope.launch {
             try {
                 val configText = withContext(Dispatchers.IO) {
-                    fetchConfigByToken(token)
+                    fetchConfig(configUrl)
                 }
 
                 if (!configText.contains("[Interface]") || !configText.contains("[Peer]")) {
@@ -107,7 +110,7 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
                 existing?.deleteAsync()
                 tunnelManager.create(TUNNEL_NAME, config)
 
-                val message = if (isUpdate) "Конфиг wgkeybot обновлён" else "Конфиг wgkeybot сохранён"
+                val message = if (isUpdate) "Конфиг обновлён" else "Конфиг сохранён"
                 Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
 
                 val fragment = supportFragmentManager.findFragmentById(R.id.list_detail_container)
@@ -125,8 +128,8 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
     }
 
     @Throws(Exception::class)
-    private fun fetchConfigByToken(token: String): String {
-        val url = URL("https://key.shadowgate.online/api/config/$token")
+    private fun fetchConfig(configUrl: String): String {
+        val url = URL(configUrl)
         val connection = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = 15_000
@@ -143,13 +146,11 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
             val body = BufferedReader(InputStreamReader(stream)).use { it.readText() }
             if (code !in 200..299) throw IllegalStateException("HTTP $code: $body")
 
-            // Парсим JSON и достаём поле config
             val json = JSONObject(body)
             if (!json.getBoolean("ok")) {
                 throw IllegalStateException("Server error: ${json.optString("error")}")
             }
             json.getString("config").trim()
-
         } finally {
             connection.disconnect()
         }
@@ -180,6 +181,6 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
     }
 
     companion object {
-        private const val TUNNEL_NAME = "wgkeybot"
+        private const val TUNNEL_NAME = "goravpn"
     }
 }
