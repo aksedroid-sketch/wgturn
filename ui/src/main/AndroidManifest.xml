@@ -73,7 +73,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="wgkeybot"
+                    android:scheme="goravpn"
                     android:host="import" />
             </intent-filter>
         </activity>
