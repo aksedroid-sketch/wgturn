@@ -4,7 +4,9 @@
  */
 package com.wireguard.android.activity
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -29,6 +31,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.UUID
 import org.json.JSONObject
 
 class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener {
@@ -127,6 +130,20 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
         }
     }
 
+    /**
+     * Persistent device ID — сохраняется в SharedPreferences.
+     * При переустановке приложения / Clear Data — генерится новый
+     * (это норма: сервер увидит как новое устройство).
+     */
+    private fun getOrCreateDeviceId(): String {
+        val prefs = getSharedPreferences("wgturn_prefs", Context.MODE_PRIVATE)
+        return prefs.getString("device_hwid", null) ?: run {
+            val id = UUID.randomUUID().toString()
+            prefs.edit().putString("device_hwid", id).apply()
+            id
+        }
+    }
+
     @Throws(Exception::class)
     private fun fetchConfig(configUrl: String): String {
         val url = URL(configUrl)
@@ -135,6 +152,12 @@ class MainActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener 
             connectTimeout = 15_000
             readTimeout = 15_000
             setRequestProperty("Accept", "application/json")
+            // Идемпотентный provision на стороне сервера: тот же HWID = тот же peer.
+            setRequestProperty("X-Device-HWID", getOrCreateDeviceId())
+            setRequestProperty("X-Device-OS", "Android")
+            setRequestProperty("X-Device-Model", Build.MODEL ?: "")
+            setRequestProperty("X-OS-Version", Build.VERSION.RELEASE ?: "")
+            setRequestProperty("User-Agent", "wgturn/1.0 (Android ${Build.VERSION.RELEASE})")
         }
         return try {
             val code = connection.responseCode
